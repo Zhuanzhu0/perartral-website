@@ -9,7 +9,7 @@ import Lenis from 'lenis';
 
 import { site, news } from './config.js';
 import { ScrubVideo } from './motion/scroll-video.js';
-import { initCursor, initMagnetic, initTilt } from './motion/interactions.js';
+import { initMagnetic, initTilt } from './motion/interactions.js';
 import { initSpatialView } from './spatial/spatial-view.js';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -429,7 +429,6 @@ async function boot() {
   const bridgeB = new ScrubVideo(bridgeBEl);
 
   initHeader();
-  initCursor();
   initMagnetic();
   initTilt('.news-card');
   initSpatialView({ lenis });

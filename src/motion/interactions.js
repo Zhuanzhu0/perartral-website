@@ -2,33 +2,6 @@ import gsap from 'gsap';
 
 const finePointer = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
-/** Custom cursor: a gold dot plus a lagging ring that grows on links and shows labels. */
-export function initCursor() {
-  if (!finePointer()) return;
-  const cursor = document.querySelector('.cursor');
-  const dot = cursor.querySelector('.cursor__dot');
-  const ring = cursor.querySelector('.cursor__ring');
-  const label = cursor.querySelector('.cursor__label');
-  const dx = gsap.quickTo(dot, 'x', { duration: 0.08 });
-  const dy = gsap.quickTo(dot, 'y', { duration: 0.08 });
-  const rx = gsap.quickTo(ring, 'x', { duration: 0.45, ease: 'power3' });
-  const ry = gsap.quickTo(ring, 'y', { duration: 0.45, ease: 'power3' });
-
-  window.addEventListener('pointermove', (e) => {
-    dx(e.clientX); dy(e.clientY); rx(e.clientX); ry(e.clientY);
-    cursor.classList.remove('is-hidden');
-  }, { passive: true });
-  document.addEventListener('pointerleave', () => cursor.classList.add('is-hidden'));
-
-  document.addEventListener('pointerover', (e) => {
-    const labelled = e.target.closest('[data-cursor]');
-    const hoverable = e.target.closest('a, button, input, textarea, canvas');
-    cursor.classList.toggle('is-label', !!labelled);
-    cursor.classList.toggle('is-hover', !labelled && !!hoverable);
-    label.textContent = labelled ? labelled.dataset.cursor : '';
-  });
-}
-
 /** Magnetic buttons: they lean toward the pointer, their label leans a bit further. */
 export function initMagnetic() {
   if (!finePointer()) return;

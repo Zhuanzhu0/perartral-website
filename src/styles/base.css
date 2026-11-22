@@ -107,23 +107,6 @@ ol, ul { list-style: none; }
 /* ---------- Split text helpers ---------- */
 .split-line { overflow: hidden; padding-bottom: 0.08em; margin-bottom: -0.08em; }
 
-/* ---------- Cursor ---------- */
-.cursor { position: fixed; left: 0; top: 0; z-index: 1500; pointer-events: none; display: none; }
-.cursor__dot, .cursor__ring { position: fixed; left: 0; top: 0; border-radius: 50%; will-change: transform; }
-.cursor__dot { width: 6px; height: 6px; margin: -3px 0 0 -3px; background: var(--gold); }
-.cursor__ring {
-  width: 40px; height: 40px; margin: -20px 0 0 -20px; border: 1.5px solid var(--gold);
-  display: grid; place-items: center; transition: width .35s var(--ease-out), height .35s var(--ease-out), margin .35s var(--ease-out), background-color .35s, border-color .35s;
-}
-.cursor__label { font: 600 12px/1 var(--font-body); color: var(--brown-2); opacity: 0; transition: opacity .2s; letter-spacing: .02em; }
-.cursor.is-label .cursor__ring { width: 84px; height: 84px; margin: -42px 0 0 -42px; background: var(--gold); border-color: var(--gold); }
-.cursor.is-label .cursor__label { opacity: 1; }
-.cursor.is-hover .cursor__ring { width: 58px; height: 58px; margin: -29px 0 0 -29px; }
-.cursor.is-hidden { opacity: 0; }
-@media (hover: hover) and (pointer: fine) {
-  .cursor { display: block; }
-}
-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
   .grain { display: none; }
