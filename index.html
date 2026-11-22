@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Perartral Technologies · Logistics for the last post</title>
+  <meta name="description" content="Perartral builds software for logistics where networks fail and roads close. HimSetu: offline-first stores and winter-resupply planning for remote posts." />
+  <meta name="theme-color" content="#2a1305" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="preload" as="image" href="/media/fpv_01_river_rush_poster.jpg" />
+  <style>
+    /* critical: the preloader is styled before the main stylesheet arrives */
+    html { background: #2a1305; }
+    body.is-loading { overflow: hidden; }
+    .preloader { position: fixed; inset: 0; z-index: 1000; background: #2a1305; color: #f6efe4; }
+    .preloader > * { opacity: 0; } /* shown once the stylesheet has loaded */
+    .preloader svg { max-width: none; }
+    .preloader__post svg { width: 40px; height: 56px; }
+    .preloader__drone { width: 160px; }
+    .svg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+  </style>
+  <script type="module" src="/src/main.js"></script>
+</head>
+<body class="is-loading">
+  <a class="skip-link" href="#himsetu">Skip to content</a>
+
+  <!-- ================= PRELOADER ================= -->
+  <!-- SVG filter: outer-edge outline for big type over video -->
+  <svg class="svg-defs" width="0" height="0" aria-hidden="true" focusable="false">
+    <filter id="text-outline" x="-2%" y="-10%" width="104%" height="120%" color-interpolation-filters="sRGB">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="1.6" result="grown" />
+      <feComposite in="grown" in2="SourceAlpha" operator="out" result="ring" />
+      <feFlood flood-color="#ffffff" flood-opacity="0.92" />
+      <feComposite in2="ring" operator="in" />
+    </filter>
+  </svg>
+
+  <!-- ================= PRELOADER (drone delivery) ================= -->
+  <div class="preloader" aria-hidden="true">
+    <div class="preloader__inner">
+      <p class="preloader__word">Perartral</p>
+      <p class="preloader__status mono">Resupplying the last post</p>
+    </div>
+
+    <div class="preloader__lane">
+      <div class="preloader__path"><i></i></div>
+      <div class="preloader__post">
+        <svg viewBox="0 0 40 56" fill="none">
+          <line x1="8" y1="4" x2="8" y2="54" stroke="#f6efe4" stroke-width="2.5" stroke-linecap="round" />
+          <path d="M9.5 5 L34 12 L9.5 19 Z" fill="#dcab2c" />
+          <ellipse cx="8" cy="54" rx="14" ry="2.5" fill="rgba(246,239,228,.2)" />
+        </svg>
+        <span class="mono">Last post</span>
+      </div>
+      <div class="preloader__drone">
+        <div class="drone">
+          <svg class="drone__svg" viewBox="0 0 160 124" fill="none">
+            <!-- rotors -->
+            <g class="drone__rotor drone__rotor--l"><ellipse cx="30" cy="18" rx="24" ry="3.2" fill="#f0cd5e" /></g>
+            <g class="drone__rotor drone__rotor--r"><ellipse cx="130" cy="18" rx="24" ry="3.2" fill="#f0cd5e" /></g>
+            <ellipse cx="30" cy="18" rx="25" ry="5" fill="rgba(240,205,94,.14)" />
+            <ellipse cx="130" cy="18" rx="25" ry="5" fill="rgba(240,205,94,.14)" />
+            <!-- masts and motors -->
+            <rect x="27" y="18" width="6" height="12" rx="2" fill="#dcab2c" />
+            <rect x="127" y="18" width="6" height="12" rx="2" fill="#dcab2c" />
+            <!-- arms -->
+            <rect x="20" y="28" width="120" height="6" rx="3" fill="#cdb79a" />
+            <!-- body -->
+            <rect x="50" y="24" width="60" height="26" rx="12" fill="#f6efe4" />
+            <rect x="58" y="34" width="44" height="4" rx="2" fill="#dcab2c" />
+            <circle cx="108" cy="44" r="6" fill="#2a1305" stroke="#dcab2c" stroke-width="2" />
+            <circle cx="109.5" cy="42.5" r="1.6" fill="#f0cd5e" />
+            <!-- skids -->
+            <path d="M64 49 L58 62 M96 49 L102 62" stroke="#cdb79a" stroke-width="3" stroke-linecap="round" />
+            <path d="M50 62 H70 M90 62 H110" stroke="#cdb79a" stroke-width="3" stroke-linecap="round" />
+            <!-- cargo on a tether -->
+            <g class="drone__cargo">
+              <line x1="80" y1="50" x2="80" y2="88" stroke="#f6efe4" stroke-width="1.6" stroke-dasharray="3 2" />
+              <rect x="64" y="88" width="32" height="26" rx="3" fill="#dcab2c" />
+              <rect x="64" y="98" width="32" height="5" fill="#b88617" />
+              <rect x="77" y="88" width="6" height="26" fill="#b88617" />
+              <g stroke="#2a1305" stroke-width="1.6" fill="none"><circle cx="80" cy="93.5" r="2.3" /><circle cx="76.5" cy="108" r="2.3" /><circle cx="83.5" cy="108" r="2.3" /></g>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="preloader__count"><span class="preloader__num">0</span><span>%</span></div>
+  </div>
+
+  <!-- ================= CURSOR ================= -->
+  <div class="cursor" aria-hidden="true"><div class="cursor__ring"><span class="cursor__label"></span></div><div class="cursor__dot"></div></div>
+
+  <!-- ================= HEADER ================= -->
+  <header class="header" data-theme="dark">
+    <a class="header__logo" href="#top" aria-label="Perartral Technologies home">
+      <img class="logo-dark" src="/media/logo.png" alt="Perartral Technologies" width="866" height="169" />
+      <img class="logo-light" src="/media/logo-light.png" alt="" width="866" height="169" />
+    </a>
+    <nav class="header__nav" aria-label="Primary">
+      <a href="#himsetu" data-cursor="Go"><span class="nav-idx">01</span>HimSetu</a>
+      <a href="#news" data-cursor="Go"><span class="nav-idx">02</span>News</a>
+      <a href="#contact" data-cursor="Go"><span class="nav-idx">03</span>Contact</a>
+    </nav>
+    <a class="btn btn--gold btn--sm header__cta magnetic" href="#contact"><span>Request a demo</span></a>
+    <button class="header__menu" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu"><i></i><i></i></button>
+    <div class="header__progress"><i></i></div>
+  </header>
+
+  <div class="mobile-menu" id="mobile-menu" hidden>
+    <a href="#himsetu"><span>01</span>HimSetu</a>
+    <a href="#news"><span>02</span>News</a>
+    <a href="#contact"><span>03</span>Contact</a>
+    <a class="btn btn--gold" href="#contact"><span>Request a demo</span></a>
+  </div>
+
+  <div class="page">
+  <main id="main">
+
+    <!-- ================= HERO (scrubbed clip 01) ================= -->
+    <section class="hero scrub" id="top" data-clip="/media/fpv_01_river_rush_scrub.mp4" aria-label="Introduction">
+      <div class="hero__pin">
+        <div class="hero__media scrub__media">
+          <video class="scrub__video" muted playsinline preload="auto" poster="/media/fpv_01_river_rush_poster.jpg"></video>
+          <div class="hero__scrim"></div>
+          <div class="grain"></div>
+        </div>
+
+        <canvas class="hero__rings" aria-label="Interactive Perartral rings. Hover or tap to spin them."></canvas>
+
+        <div class="hero__content">
+          <p class="eyebrow eyebrow--light hero__eyebrow"><span class="dot"></span>Perartral Technologies India</p>
+          <h1 class="hero__title" aria-label="The World Runs on Logistics. Logistics run with Perartral.">
+            <span class="hero__line" aria-hidden="true">The World Runs on Logistics.</span>
+            <span class="hero__line hero__line--gold" aria-hidden="true">Logistics run with Perartral.</span>
+          </h1>
+          <p class="hero__sub">Software for supply chains where networks fail and roads close, built for the last post.</p>
+          <div class="hero__ctas">
+            <a class="btn btn--gold magnetic" href="#contact"><span>Request a demo</span></a>
+            <a class="btn btn--ghost-light magnetic" href="#himsetu"><span>Meet HimSetu</span></a>
+          </div>
+        </div>
+
+        <div class="hero__foot">
+          <span class="hero__scroll"><i></i>Scroll to fly in</span>
+          <span class="hero__meta mono">01 — Logistics for the last post</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= HIMSETU ================= -->
+    <section class="section himsetu" id="himsetu" aria-labelledby="himsetu-title">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-idx mono">01 / Product</span>
+          <span class="section-rule"></span>
+          <span class="mono muted">“Him” + “Setu”: a bridge to the Himalayan posts</span>
+        </div>
+
+        <div class="himsetu__intro">
+          <h2 class="display split-lines" id="himsetu-title">HimSetu. A bridge to <em>the last post.</em></h2>
+          <p class="lead reveal-up">Offline-first stores and winter-resupply planning. A live picture of what every remote post holds, and a tablet that keeps working with no signal for weeks.</p>
+        </div>
+
+        <ol class="parts">
+          <li class="part reveal-up">
+            <span class="part__n mono">01</span>
+            <h3>Battalion server</h3>
+            <p>One signed stock ledger. Every movement written once, never silently changed.</p>
+          </li>
+          <li class="part reveal-up">
+            <span class="part__n mono">02</span>
+            <h3>Web app</h3>
+            <p>Dashboard, demands, movements and the winter plan, in English and Hindi.</p>
+          </li>
+          <li class="part reveal-up">
+            <span class="part__n mono">03</span>
+            <h3>Tablet app</h3>
+            <p>Receive, issue, count and demand with no network. Syncs by link, USB or radio code.</p>
+          </li>
+        </ol>
+
+        <div class="himsetu__media">
+          <figure class="mapclip mask-reveal">
+            <div class="mapclip__frame">
+              <video class="mapclip__video" src="/media/himsetu-map.mp4" poster="/media/himsetu-map-poster.jpg" muted playsinline loop preload="none" aria-label="Animated map: the battalion server syncing six forward posts. Demo data."></video>
+              <span class="chip mono"><i class="live"></i>Supply-route map · demo data</span>
+            </div>
+          </figure>
+
+          <div class="touch-surface" id="touch-surface">
+            <div class="touch-surface__stage">
+              <canvas class="tablet-canvas" aria-label="Interactive 3D HimSetu tablet. Tap the keys."></canvas>
+              <span class="chip chip--light mono touch-hint"><i class="pulse"></i>Touch the tablet</span>
+            </div>
+            <div class="touch-surface__log" aria-live="polite">
+              <div class="log__head mono"><span>Post outbox</span><span class="log__state">Offline · 0 queued</span></div>
+              <ul class="log__list"><li class="log__empty">Tap Receive, Issue, Count or Demand.</li></ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="shots">
+          <figure class="shot shot--wide mask-reveal">
+            <div class="shot__img"><img src="/media/himsetu-dashboard.webp" alt="HimSetu dashboard showing stock position and days of supply for every post (demo data)" loading="lazy" width="1360" height="1150" /></div>
+            <figcaption class="mono">Dashboard · every post, days of supply</figcaption>
+          </figure>
+          <figure class="shot mask-reveal">
+            <div class="shot__img"><img src="/media/himsetu-winter-plan.webp" alt="HimSetu winter plan with loads by pack animal, helicopter and porter (demo data)" loading="lazy" width="1360" height="800" /></div>
+            <figcaption class="mono">Winter plan · with a no-helicopter scenario</figcaption>
+          </figure>
+          <div class="spatial-cta reveal-up">
+            <p class="mono muted">Spatial browsing</p>
+            <h3>Walk around the supply network.</h3>
+            <p>Orbit, pinch and grab HimSetu in 3D. On a headset, step into it with your hands.</p>
+            <button class="btn btn--brown magnetic" id="open-spatial" type="button"><span>Enter spatial view</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TRANSITION A (scrubbed clip 02) ================= -->
+    <section class="bridge bridge--a scrub" data-clip="/media/fpv_02_canyon_dive_scrub.mp4" aria-label="Where networks fail and roads close">
+      <div class="bridge__pin">
+        <div class="bridge__media scrub__media">
+          <video class="scrub__video" muted playsinline preload="none" poster="/media/fpv_02_canyon_dive_poster.jpg"></video>
+          <div class="bridge__scrim"></div>
+          <div class="grain"></div>
+        </div>
+        <div class="bridge__text">
+          <p class="eyebrow eyebrow--light">Built for the hard ground</p>
+          <div class="outline-wrap">
+            <!-- outline layer: an SVG filter traces only the outer edge of the letters -->
+            <p class="outline-text outline-text--stroke" aria-hidden="true"><span>Where networks fail</span><span>and roads close.</span></p>
+            <!-- gold layer: fills in as you scroll -->
+            <p class="outline-text outline-text--fill"><span>Where networks fail</span><span>and roads close.</span></p>
+          </div>
+        </div>
+        <div class="bridge__counter mono"><span class="bridge__alt">00:00.0</span> · FPV canyon run</div>
+      </div>
+    </section>
+
+    <!-- ================= NEWS ================= -->
+    <section class="section news" id="news" aria-labelledby="news-title">
+      <div class="marquee" aria-hidden="true">
+        <div class="marquee__track">
+          <span>Featured News</span><i></i><span>Latest from Perartral</span><i></i><span>Featured News</span><i></i><span>Latest from Perartral</span><i></i>
+        </div>
+      </div>
+      <div class="container">
+        <div class="section-head">
+          <span class="section-idx mono">02 / Featured News</span>
+          <span class="section-rule"></span>
+          <span class="mono muted">Most recent first</span>
+        </div>
+        <h2 class="display display--md split-lines" id="news-title">News from <em>Perartral.</em></h2>
+        <div class="news__list" id="news-list"><!-- filled from src/config.js --></div>
+      </div>
+    </section>
+
+    <!-- ================= TRANSITION B (scrubbed clip 05) ================= -->
+    <section class="bridge bridge--b scrub" data-clip="/media/fpv_05_rising_reveal_scrub.mp4" aria-label="Let's move what matters">
+      <div class="bridge__pin">
+        <div class="bridge__media scrub__media">
+          <video class="scrub__video" muted playsinline preload="none" poster="/media/fpv_05_rising_reveal_poster.jpg"></video>
+          <div class="bridge__scrim bridge__scrim--soft"></div>
+          <div class="grain"></div>
+        </div>
+        <div class="bridge__text bridge__text--center">
+          <p class="word-reveal">Let’s move what matters.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CONTACT ================= -->
+    <section class="section contact" id="contact" aria-labelledby="contact-title">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-idx mono">03 / Contact</span>
+          <span class="section-rule"></span>
+          <span class="mono muted">Pilots · partnerships · demos</span>
+        </div>
+        <div class="contact__grid">
+          <div class="contact__left">
+            <h2 class="display split-lines" id="contact-title">Talk to <em>Perartral.</em></h2>
+            <p class="lead reveal-up">Want to see HimSetu working, plan a pilot, or build with us? Write to us and the founder will reply.</p>
+
+            <div class="email-card reveal-up">
+              <span class="mono muted">Email</span>
+              <a class="email-card__addr" id="email-addr" href="#contact" data-cursor="Write">Email address coming soon</a>
+              <button class="email-card__copy mono" id="email-copy" type="button" hidden>Copy</button>
+            </div>
+
+            <ul class="contact__ways reveal-up">
+              <li><span class="mono muted">LinkedIn</span><a id="contact-linkedin" href="#contact">Coming soon</a></li>
+              <li><span class="mono muted">Based in</span><span id="contact-location">India</span></li>
+            </ul>
+          </div>
+
+          <form class="contact__form reveal-up" id="contact-form" novalidate>
+            <p class="form__title">Request a demo</p>
+            <label class="field"><input name="name" required autocomplete="name" placeholder=" " /><span>Your name</span></label>
+            <label class="field"><input name="org" autocomplete="organization" placeholder=" " /><span>Organisation</span></label>
+            <label class="field"><input name="email" type="email" required autocomplete="email" placeholder=" " /><span>Your email</span></label>
+            <label class="field field--area"><textarea name="message" rows="4" required placeholder=" "></textarea><span>What would you like to move?</span></label>
+            <button class="btn btn--gold btn--block magnetic" type="submit"><span>Send message</span></button>
+            <p class="form__note mono" id="form-note">Opens your email app with the message filled in.</p>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+  </div>
+
+  <!-- ================= FOOTER (fixed reveal) ================= -->
+  <footer class="footer" id="footer">
+    <div class="footer__inner">
+      <video class="footer__video" src="/media/fpv_06_footer_loop.mp4" muted playsinline loop preload="none" aria-hidden="true"></video>
+      <div class="footer__tint"></div>
+      <div class="grain"></div>
+
+      <div class="footer__top container">
+        <p class="footer__tag">Logistics run with <em>Perartral.</em></p>
+        <a class="btn btn--gold magnetic" href="#contact"><span>Request a demo</span></a>
+      </div>
+
+      <div class="footer__brand">
+        <svg class="footer__orbits" viewBox="0 0 1600 520" preserveAspectRatio="none" aria-hidden="true">
+          <ellipse class="orbit orbit--1" cx="800" cy="260" rx="760" ry="200" />
+          <ellipse class="orbit orbit--2" cx="800" cy="260" rx="640" ry="240" transform="rotate(-4 800 260)" />
+          <ellipse class="orbit orbit--3" cx="800" cy="260" rx="700" ry="150" transform="rotate(3 800 260)" />
+          <circle class="sat" r="5"><animateMotion dur="14s" repeatCount="indefinite" path="M40,260 a760,200 0 1,0 1520,0 a760,200 0 1,0 -1520,0" /></circle>
+          <circle class="sat sat--2" r="3.5"><animateMotion dur="19s" repeatCount="indefinite" begin="-6s" path="M160,260 a640,240 0 1,1 1280,0 a640,240 0 1,1 -1280,0" /></circle>
+          <circle class="sat sat--3" r="4"><animateMotion dur="23s" repeatCount="indefinite" begin="-11s" path="M100,260 a700,150 0 1,0 1400,0 a700,150 0 1,0 -1400,0" /></circle>
+        </svg>
+        <canvas class="footer__rings" aria-label="Interactive Perartral rings. Drag to spin."></canvas>
+        <div class="footer__word" aria-label="Perartral">
+          <span class="footer__word-base" aria-hidden="true">Perartral</span>
+          <span class="footer__word-shine" aria-hidden="true">Perartral</span>
+        </div>
+        <p class="footer__sub mono">Technologies India</p>
+      </div>
+
+      <div class="footer__cols container">
+        <div class="fcol">
+          <p class="fcol__h mono">Company</p>
+          <a href="#himsetu">HimSetu</a>
+          <a href="#news">Featured News</a>
+          <a href="#contact">Request a demo</a>
+        </div>
+        <div class="fcol">
+          <p class="fcol__h mono">Connect</p>
+          <a class="social" id="f-linkedin" href="#contact" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9.75h4V21H3V9.75Zm6.5 0h3.8v1.6h.06c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.77 2.65 4.77 6.1V21h-4v-4.9c0-1.17-.02-2.68-1.63-2.68-1.64 0-1.89 1.28-1.89 2.6V21h-4V9.75Z"/></svg>LinkedIn</a>
+          <a class="social" id="f-gmail" href="#contact" aria-label="Gmail"><svg viewBox="0 0 24 24"><path d="M2 6.5A2.5 2.5 0 0 1 4.5 4h15A2.5 2.5 0 0 1 22 6.5v11a2.5 2.5 0 0 1-2.5 2.5H18V9.2l-6 4.5-6-4.5V20H4.5A2.5 2.5 0 0 1 2 17.5v-11Zm2.3-.5L12 11.8 19.7 6H4.3Z"/></svg>Gmail</a>
+          <a class="social" id="f-x" href="#contact" aria-label="X" hidden><svg viewBox="0 0 24 24"><path d="M17.8 3h3.1l-6.8 7.8 8 10.2h-6.3l-4.9-6.4L5.3 21H2.2l7.3-8.3L1.8 3h6.4l4.4 5.9L17.8 3Zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5Z"/></svg>X</a>
+        </div>
+        <div class="fcol">
+          <p class="fcol__h mono">Contact us</p>
+          <a href="#contact">Contact form</a>
+          <span class="f-email">Email coming soon</span>
+          <span>India</span>
+        </div>
+        <div class="fcol fcol--top">
+          <p class="fcol__h mono">The last post, reached.</p>
+          <button class="to-top mono" type="button" aria-label="Back to top">Back to top <span>↑</span></button>
+        </div>
+      </div>
+
+      <div class="footer__bar container mono">
+        <span>© <span id="year">2026</span> Perartral Technologies India. All rights reserved.</span>
+        <span>HimSetu screens and figures shown are demo data.</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= SPATIAL VIEW (xr-live) ================= -->
+  <div class="spatial" id="spatial" role="dialog" aria-modal="true" aria-labelledby="spatial-title" hidden>
+    <div class="spatial__bar">
+      <div>
+        <p class="mono spatial__eyebrow">Spatial view · HimSetu</p>
+        <h2 id="spatial-title">The supply network, in space.</h2>
+      </div>
+      <div class="spatial__help mono">Drag to orbit · pinch or scroll to zoom · grab the cards</div>
+      <button class="spatial__close" type="button" aria-label="Close spatial view">✕</button>
+    </div>
+    <div class="spatial__stage" id="spatial-stage"></div>
+    <div class="spatial__legend mono">
+      <span><i class="sw sw--gold"></i>Battalion hub</span>
+      <span><i class="sw sw--brown"></i>Forward posts</span>
+      <span><i class="sw sw--line"></i>Resupply routes</span>
+    </div>
+  </div>
+</body>
+</html>

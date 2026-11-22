@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/MotionPathPlugin.min.js"></script>
+    <style>
+      :root {
+        --paper: #faf7f2;
+        --brown: #4a2208;
+        --brown-2: #2a1305;
+        --gold: #dcab2c;
+        --gold-2: #8a6410;
+        --muted: #6b5a4b;
+        --line: #e6dccd;
+        --ground: var(--paper);
+        --ink: var(--brown);
+        --font-display: "Sora", sans-serif;
+        --font-mono: "JetBrains Mono", monospace;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--ground); }
+      #root { position: relative; width: 1920px; height: 1080px; font-family: var(--font-display); color: var(--ink); }
+      .clip { position: absolute; inset: 0; }
+      svg#map { position: absolute; inset: 0; }
+      .contour { fill: none; stroke: #d9cbb6; stroke-width: 1.4; }
+      .contour.major { stroke: #c9b495; stroke-width: 2; }
+      .route { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .r-road { stroke: var(--brown); stroke-width: 5; }
+      .r-mule { stroke: var(--brown); stroke-width: 4; stroke-dasharray: 16 10; }
+      .r-porter { stroke: #7a4a22; stroke-width: 4; stroke-dasharray: 2 10; }
+      .r-heli { stroke: var(--gold); stroke-width: 4; stroke-dasharray: 14 12; }
+      .label { font-family: var(--font-mono); font-size: 28px; font-weight: 500; fill: var(--brown); letter-spacing: .06em; }
+      .sub { font-family: var(--font-mono); font-size: 22px; fill: var(--muted); letter-spacing: .08em; }
+
+      #hud { position: absolute; left: 80px; top: 70px; }
+      .eyebrow { font-family: var(--font-mono); font-size: 28px; letter-spacing: .22em; text-transform: uppercase; color: var(--gold-2); }
+      #hud h1 { font-size: 76px; font-weight: 700; letter-spacing: -.02em; margin-top: 14px; line-height: 1; }
+      #hud p { font-family: var(--font-mono); font-size: 28px; color: var(--muted); margin-top: 16px; letter-spacing: .04em; }
+      .demo { display: inline-block; margin-left: 14px; padding: 4px 12px; border: 2px solid var(--gold); color: var(--gold-2); border-radius: 999px; font-size: 22px; letter-spacing: .16em; vertical-align: middle; }
+
+      #panel { position: absolute; right: 70px; top: 70px; width: 520px; background: #fff; border: 1px solid var(--line); border-radius: 26px; padding: 30px 32px; box-shadow: 0 30px 60px -30px rgba(74,34,8,.35); }
+      #panel h2 { font-size: 32px; font-weight: 600; display: flex; justify-content: space-between; align-items: baseline; }
+      #panel h2 span { font-family: var(--font-mono); font-size: 22px; color: var(--muted); letter-spacing: .1em; }
+      .row { display: grid; grid-template-columns: 82px 1fr 60px; align-items: center; gap: 14px; margin-top: 18px; font-family: var(--font-mono); font-size: 28px; }
+      .row b { color: var(--brown); font-weight: 700; }
+      .bar { height: 12px; border-radius: 99px; background: #f1ebe2; overflow: hidden; }
+      .bar i { display: block; height: 100%; width: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--gold-2), var(--gold)); transform-origin: left center; }
+      .bar i.low { background: linear-gradient(90deg, #9c3b12, #d2692a); }
+      .num { text-align: right; color: var(--brown); font-weight: 700; }
+      #sync { margin-top: 26px; padding-top: 20px; border-top: 1px dashed var(--line); font-family: var(--font-mono); font-size: 24px; color: var(--muted); display: flex; justify-content: space-between; }
+      #sync b { color: var(--gold-2); }
+
+      #legend { position: absolute; right: 70px; bottom: 70px; width: 520px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px 16px; font-family: var(--font-mono); font-size: 28px; color: var(--brown); letter-spacing: .04em; }
+      #legend div { display: flex; align-items: center; gap: 12px; }
+      #legend svg { width: 40px; height: 10px; flex: none; }
+      #legend div { white-space: nowrap; }
+
+      #banner { position: absolute; right: 70px; bottom: 70px; width: 520px; background: var(--brown); color: #fff; border-radius: 26px; padding: 24px 32px; font-size: 32px; font-weight: 600; display: flex; align-items: center; gap: 20px; line-height: 1.2; }
+      #banner small { display: block; font-family: var(--font-mono); font-size: 24px; font-weight: 400; color: #f2d27a; margin-top: 6px; }
+      #banner i { flex: none; width: 14px; height: 14px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 6px rgba(220,171,44,.25); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="12" data-width="1920" data-height="1080">
+      <div id="scene" class="clip" data-start="0" data-duration="12" data-track-index="0">
+        <svg id="map" viewBox="0 0 1920 1080" width="1920" height="1080">
+          <defs>
+            <radialGradient id="vign" cx="40%" cy="55%" r="75%">
+              <stop offset="60%" stop-color="#faf7f2" stop-opacity="0" />
+              <stop offset="100%" stop-color="#efe6d8" stop-opacity="1" />
+            </radialGradient>
+            <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6" /></filter>
+          </defs>
+          <g id="contours"></g>
+          <rect width="1920" height="1080" fill="url(#vign)" />
+          <g id="routes"></g>
+          <g id="cargo"></g>
+          <g id="pulses"></g>
+          <g id="nodes"></g>
+        </svg>
+
+        <div id="hud">
+          <div class="eyebrow">HimSetu · Winter resupply</div>
+          <h1>Every post, one picture.</h1>
+          <p>Battalion server ⟷ 6 forward posts <span class="demo">DEMO DATA</span></p>
+        </div>
+
+        <div id="panel">
+          <h2>Days of supply <span>SECTOR B-20</span></h2>
+          <div id="rows"></div>
+          <div id="sync"><span>Last sync</span><b id="syncval">— waiting for link</b></div>
+        </div>
+
+        <div id="legend">
+          <div><svg viewBox="0 0 56 10"><line x1="2" y1="5" x2="54" y2="5" stroke="#4a2208" stroke-width="4" stroke-linecap="round" /></svg>Vehicle</div>
+          <div><svg viewBox="0 0 56 10"><line x1="2" y1="5" x2="54" y2="5" stroke="#4a2208" stroke-width="4" stroke-dasharray="12 7" /></svg>Pack animal</div>
+          <div><svg viewBox="0 0 56 10"><line x1="2" y1="5" x2="54" y2="5" stroke="#7a4a22" stroke-width="4" stroke-dasharray="2 8" stroke-linecap="round" /></svg>Porter</div>
+          <div><svg viewBox="0 0 56 10"><line x1="2" y1="5" x2="54" y2="5" stroke="#dcab2c" stroke-width="4" stroke-dasharray="10 8" /></svg>Helicopter</div>
+        </div>
+
+        <div id="banner"><i></i><div>All 6 posts reporting<small>Winter plan on track</small></div></div>
+      </div>
+    </div>
+
+    <script>
+      gsap.registerPlugin(MotionPathPlugin);
+      const NS = "http://www.w3.org/2000/svg";
+      const el = (tag, attrs, parent) => {
+        const n = document.createElementNS(NS, tag);
+        for (const k in attrs) n.setAttribute(k, attrs[k]);
+        if (parent) parent.appendChild(n);
+        return n;
+      };
+
+      // ---------- deterministic terrain contours (no Math.random) ----------
+      let seed = 20261123;
+      const rand = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+      const peaks = [
+        { x: 720, y: 560, rx: 470, ry: 240, n: 11 },
+        { x: 1060, y: 760, rx: 290, ry: 190, n: 8 },
+        { x: 400, y: 680, rx: 270, ry: 170, n: 7 },
+      ];
+      const contoursG = document.getElementById("contours");
+      const contourEls = [];
+      const contourLens = [];
+      peaks.forEach((p) => {
+        const ph = [rand() * 6.28, rand() * 6.28, rand() * 6.28];
+        for (let i = 0; i < p.n; i++) {
+          const t = 1 - i / p.n;
+          let d = "";
+          const steps = 120;
+          for (let s = 0; s <= steps; s++) {
+            const a = (s / steps) * Math.PI * 2;
+            const w = 1 + 0.12 * Math.sin(a * 3 + ph[0] + i * 0.35) + 0.07 * Math.sin(a * 5 + ph[1] - i * 0.2) + 0.04 * Math.sin(a * 9 + ph[2]);
+            const x = p.x + Math.cos(a) * p.rx * t * w;
+            const y = p.y + Math.sin(a) * p.ry * t * w;
+            d += (s ? "L" : "M") + x.toFixed(1) + " " + y.toFixed(1);
+          }
+          const c = el("path", { d: d + "Z", class: "contour" + (i % 4 === 0 ? " major" : "") }, contoursG);
+          contourEls.push(c);
+          contourLens.push(c.getTotalLength());
+        }
+      });
+
+      // ---------- network ----------
+      const hub = { x: 210, y: 850, name: "BN HQ", sub: "Battalion server" };
+      const posts = [
+        { id: "P01", x: 460, y: 700, mode: "road", dos: 27, low: false },
+        { id: "P02", x: 600, y: 500, mode: "mule", dos: 28, low: false },
+        { id: "P03", x: 790, y: 390, mode: "porter", dos: 12, low: true },
+        { id: "P04", x: 960, y: 650, mode: "mule", dos: 42, low: false },
+        { id: "P05", x: 1110, y: 820, mode: "road", dos: 6, low: true },
+        { id: "P06", x: 1070, y: 470, mode: "heli", dos: 33, low: false },
+      ];
+      const routesG = document.getElementById("routes");
+      const cargoG = document.getElementById("cargo");
+      const nodesG = document.getElementById("nodes");
+      const pulsesG = document.getElementById("pulses");
+      const maskDefs = document.querySelector("defs");
+
+      const routeData = posts.map((p, i) => {
+        const mx = (hub.x + p.x) / 2, my = (hub.y + p.y) / 2;
+        let d;
+        if (p.mode === "heli") {
+          d = `M${hub.x} ${hub.y} Q ${hub.x + 440} ${p.y + 90} ${p.x} ${p.y}`;
+        } else {
+          const bend = (i % 2 ? 1 : -1) * (60 + i * 14);
+          const c1x = hub.x + (p.x - hub.x) * 0.3 + bend, c1y = hub.y + (p.y - hub.y) * 0.2;
+          const c2x = hub.x + (p.x - hub.x) * 0.7 - bend * 0.6, c2y = hub.y + (p.y - hub.y) * 0.85 + bend * 0.3;
+          d = `M${hub.x} ${hub.y} C ${c1x} ${c1y} ${c2x} ${c2y} ${p.x} ${p.y}`;
+        }
+        // reveal mask: a solid stroke drawn with dashoffset over a dashed visible path
+        const mask = el("mask", { id: "m" + i, maskUnits: "userSpaceOnUse", x: 0, y: 0, width: 1920, height: 1080 }, maskDefs);
+        const mpath = el("path", { d, fill: "none", stroke: "#fff", "stroke-width": 14, "stroke-linecap": "round" }, mask);
+        const vis = el("path", { d, class: "route r-" + p.mode, mask: `url(#m${i})` }, routesG);
+        const len = mpath.getTotalLength();
+        mpath.setAttribute("stroke-dasharray", len);
+        mpath.setAttribute("stroke-dashoffset", len);
+        const dot = el("g", { opacity: 0 }, cargoG);
+        el("circle", { r: p.mode === "heli" ? 13 : 10, fill: p.mode === "heli" ? "#dcab2c" : "#4a2208" }, dot);
+        el("circle", { r: p.mode === "heli" ? 5 : 4, fill: "#fff" }, dot);
+        return { d, mpath, len, dot, vis };
+      });
+
+      // hub node
+      const hubG = el("g", { transform: `translate(${hub.x} ${hub.y})` }, nodesG);
+      const hubInner = el("g", { opacity: 0 }, hubG);
+      el("circle", { r: 34, fill: "#4a2208" }, hubInner);
+      el("circle", { r: 20, fill: "none", stroke: "#dcab2c", "stroke-width": 6 }, hubInner);
+      const hl = el("text", { x: -34, y: 76, class: "label" }, hubInner); hl.textContent = hub.name;
+      const hs = el("text", { x: -34, y: 106, class: "sub" }, hubInner); hs.textContent = hub.sub.toUpperCase();
+
+      const postEls = posts.map((p) => {
+        const g = el("g", { transform: `translate(${p.x} ${p.y})` }, nodesG);
+        const inner = el("g", { opacity: 0 }, g);
+        el("circle", { r: 20, fill: "#fff", stroke: "#4a2208", "stroke-width": 5 }, inner);
+        const core = el("circle", { r: 8, fill: "#b6a896" }, inner);
+        const t = el("text", { x: 34, y: -10, class: "label" }, inner); t.textContent = p.id + " · POST";
+        // status pill
+        const pill = el("g", { transform: "translate(34 4)" }, inner);
+        const pr = el("rect", { width: 150, height: 38, rx: 19, fill: "#efe8de" }, pill);
+        const off = el("text", { x: 75, y: 27, "text-anchor": "middle", class: "sub", "font-weight": 700, fill: "#5a4a3c" }, pill); off.textContent = "OFFLINE";
+        const on = el("text", { x: 75, y: 27, "text-anchor": "middle", class: "sub", "font-weight": 700, fill: "#2a1305", opacity: 0 }, pill); on.textContent = "SYNCED";
+        return { inner, core, pr, off, on };
+      });
+
+      // pulses from hub
+      const pulseEls = [0, 1, 2].map(() => el("circle", { cx: hub.x, cy: hub.y, r: 30, fill: "none", stroke: "#dcab2c", "stroke-width": 4, opacity: 0 }, pulsesG));
+
+      // panel rows
+      const rowsEl = document.getElementById("rows");
+      const rowEls = posts.map((p) => {
+        const r = document.createElement("div");
+        r.className = "row";
+        r.innerHTML = `<b>${p.id}</b><div class="bar"><i class="${p.low ? "low" : ""}"></i></div><div class="num">0</div>`;
+        rowsEl.appendChild(r);
+        return { bar: r.querySelector("i"), num: r.querySelector(".num"), r };
+      });
+
+      // ---------- timeline ----------
+      const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+
+      // initial states
+      contourEls.forEach((c, i) => { c.style.strokeDasharray = contourLens[i]; c.style.strokeDashoffset = contourLens[i]; });
+      gsap.set("#hud > *", { opacity: 0, y: 26 });
+      gsap.set("#panel", { opacity: 0, x: 60 });
+      gsap.set("#legend > div", { opacity: 0, y: 16 });
+      gsap.set("#banner", { opacity: 0, y: 30 });
+      rowEls.forEach((r) => gsap.set(r.bar, { scaleX: 0 }));
+
+      // 0 – 1.3 terrain draws in
+      tl.to(contourEls, { strokeDashoffset: 0, duration: 1.6, ease: "power2.inOut", stagger: 0.025 }, 0);
+      tl.to("#hud > *", { opacity: 1, y: 0, duration: 0.8, stagger: 0.12 }, 0.3);
+
+      // 1.0 hub
+      tl.fromTo(hubInner, { opacity: 0, scale: 0.4, transformOrigin: "0px 0px" }, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(2)" }, 1.0);
+      // 1.5 posts
+      postEls.forEach((p, i) => tl.fromTo(p.inner, { opacity: 0, scale: 0.5, transformOrigin: "0px 0px" }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(2.2)" }, 1.5 + i * 0.12));
+      tl.to("#panel", { opacity: 1, x: 0, duration: 0.8 }, 1.7);
+      tl.to("#legend > div", { opacity: 1, y: 0, duration: 0.5, stagger: 0.08 }, 2.0);
+
+      // 2.6 – 7.6 routes and cargo
+      routeData.forEach((r, i) => {
+        const isHeli = posts[i].mode === "heli";
+        const start = isHeli ? 6.2 : 2.6 + i * 0.45;
+        const dur = isHeli ? 1.3 : 1.5;
+        tl.to(r.mpath, { attr: { "stroke-dashoffset": 0 }, duration: dur, ease: "power2.inOut" }, start);
+        tl.set(r.dot, { opacity: 1 }, start + dur * 0.5);
+        tl.fromTo(r.dot, { motionPath: { path: r.vis, align: r.vis, alignOrigin: [0.5, 0.5], start: 0, end: 0 } },
+          { motionPath: { path: r.vis, align: r.vis, alignOrigin: [0.5, 0.5], start: 0, end: 1 }, duration: isHeli ? 1.8 : 2.6, ease: "none" }, start + dur * 0.5);
+        tl.to(r.dot, { opacity: 0, duration: 0.3 }, start + dur * 0.5 + (isHeli ? 1.8 : 2.6) - 0.15);
+      });
+
+      // 7.6 – 9.6 sync pulses + status flip + days of supply
+      pulseEls.forEach((c, i) => tl.fromTo(c, { attr: { r: 30 }, opacity: 0.9 }, { attr: { r: 1300 }, opacity: 0, duration: 2.2, ease: "power1.out" }, 7.6 + i * 0.4));
+      postEls.forEach((p, i) => {
+        const t = 7.9 + i * 0.16;
+        tl.to(p.pr, { attr: { fill: "#dcab2c" }, duration: 0.3 }, t);
+        tl.to(p.off, { opacity: 0, duration: 0.2 }, t);
+        tl.to(p.on, { opacity: 1, duration: 0.2 }, t + 0.1);
+        tl.to(p.core, { attr: { fill: "#dcab2c" }, duration: 0.3 }, t);
+      });
+      rowEls.forEach((r, i) => {
+        const t = 8.0 + i * 0.12;
+        tl.to(r.bar, { scaleX: Math.min(1, posts[i].dos / 45), duration: 1.1, ease: "power2.out" }, t);
+        tl.to(r.num, { innerText: posts[i].dos, snap: { innerText: 1 }, duration: 1.1, ease: "power2.out" }, t);
+      });
+      tl.set("#syncval", { textContent: "just now · radio code" }, 8.2);
+      tl.to("#banner", { opacity: 1, y: 0, duration: 0.7, ease: "back.out(1.6)" }, 9.3);
+      tl.to("#legend > div", { opacity: 0, y: 16, duration: 0.4, stagger: 0.04 }, 9.1);
+
+      // 11 – 12 settle back to the opening frame for a seamless loop
+      tl.to(["#banner", "#panel", "#hud > *", hubInner, ...postEls.map((p) => p.inner)], { opacity: 0, duration: 0.7, ease: "power2.in" }, 11.1);
+      routeData.forEach((r) => tl.to(r.mpath, { attr: { "stroke-dashoffset": r.len }, duration: 0.8, ease: "power2.in" }, 11.1));
+      contourEls.forEach((c, i) => tl.to(c, { strokeDashoffset: contourLens[i], duration: 0.8, ease: "power2.in" }, 11.15 + i * 0.005));
+      tl.set({}, {}, 12);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

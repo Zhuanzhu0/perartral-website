@@ -1,0 +1,22 @@
+# dependencies and build output
+node_modules/
+video/node_modules/
+dist/
+
+# HyperFrames working files (the web encode lives in public/media)
+video/himsetu-map/.hyperframes/
+video/himsetu-map/renders/
+
+# source material kept out of the public repo
+# (internal company reference; original clips — the site uses the copies in public/media)
+Perartral_Landing_Website_Reference.pdf
+/fpv_*.mp4
+/fpv_*.jpg
+/perartral-logo.jpeg
+
+# local / OS
+.wrangler/
+.env*
+*.log
+.DS_Store
+Thumbs.db

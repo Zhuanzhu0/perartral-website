@@ -1,0 +1,37 @@
+:root {
+  /* Brand colours, sampled from perartral-logo.jpeg */
+  --white: #ffffff;
+  --paper: #faf7f2;
+  --paper-2: #f3ece1;
+  --brown: #4a2208;
+  --brown-2: #2a1305;
+  --brown-3: #1c0c03;
+  --gold: #dcab2c;
+  --gold-hi: #f0cd5e;
+  --gold-lo: #b88617;
+  --gold-text: #8a6410; /* gold that passes AA on white */
+  --cream: #f6efe4;
+
+  --text: #2b1d12;
+  --muted: #6f5e4f;
+  --line: #e8dfd3;
+  --line-dark: rgba(246, 239, 228, 0.14);
+
+  --grad-gold: linear-gradient(100deg, #b88617 0%, #f0cd5e 45%, #dcab2c 60%, #b88617 100%);
+  --grad-gold-ink: linear-gradient(100deg, #7d5a0d 0%, #b88617 55%, #8a6410 100%);
+
+  /* Type */
+  --font-display: 'Sora', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Layout */
+  --gutter: clamp(16px, 4vw, 56px);
+  --maxw: 1320px;
+  --radius-lg: clamp(20px, 2.2vw, 32px);
+  --radius-md: 20px;
+  --header-h: 76px;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+}

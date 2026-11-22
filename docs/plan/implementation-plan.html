@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Perartral Website: Implementation Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--brown:#4a2208;--brown-2:#2a1305;--gold:#dcab2c;--gold-2:#b88617;--paper:#faf7f2;--ink:#2b2118;--muted:#7a6a5c;--line:#e8dfd3}
+  @page{size:A4;margin:16mm 16mm 18mm}
+  *{box-sizing:border-box}
+  body{font:10.2pt/1.5 Inter,system-ui,sans-serif;color:var(--ink);margin:0;background:#fff}
+  h1,h2,h3{font-family:Sora,sans-serif;color:var(--brown);margin:0}
+  h1{font-size:28pt;font-weight:700;letter-spacing:-.02em;line-height:1.05}
+  h2{font-size:15pt;margin:22px 0 8px;padding-top:6px;border-top:2px solid var(--gold);display:flex;gap:10px;align-items:baseline;break-after:avoid}
+  h2 .n{font-family:'JetBrains Mono',monospace;font-size:9pt;color:var(--gold-2)}
+  h3{font-size:11pt;margin:14px 0 4px;break-after:avoid}
+  p{margin:0 0 8px}
+  ul{margin:0 0 8px;padding-left:18px}
+  li{margin:2px 0}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:8.5pt;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-2)}
+  .cover{border-radius:14px;padding:26px 28px;background:linear-gradient(135deg,var(--brown-2),var(--brown));color:#fff;margin-bottom:18px;position:relative;overflow:hidden}
+  .cover h1{color:#fff;margin:8px 0 10px}
+  .cover .tag{font-family:Sora;font-size:13pt;color:#f2d27a}
+  .cover .meta{margin-top:14px;font-size:9pt;opacity:.8}
+  .cover svg{position:absolute;right:22px;top:22px;opacity:.9}
+  table{width:100%;border-collapse:collapse;margin:6px 0 10px;font-size:9.2pt;break-inside:auto}
+  tr{break-inside:avoid}
+  th{background:var(--brown);color:#fff;text-align:left;padding:6px 8px;font-weight:600}
+  td{border-bottom:1px solid var(--line);padding:6px 8px;vertical-align:top}
+  tr:nth-child(even) td{background:#fcfaf6}
+  code{font-family:'JetBrains Mono',monospace;font-size:8.6pt;background:#f5efe6;padding:1px 4px;border-radius:3px}
+  .swatches{display:flex;gap:10px;margin:8px 0 10px}
+  .sw{flex:1;border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:8.5pt}
+  .sw i{display:block;height:38px}
+  .sw span{display:block;padding:5px 7px}
+  .flow{display:flex;flex-direction:column;gap:0;margin:8px 0 12px}
+  .step{display:grid;grid-template-columns:118px 1fr;gap:12px;border-left:3px solid var(--gold);padding:7px 0 7px 12px;position:relative}
+  .step.t{border-left-style:dashed;border-left-color:var(--brown)}
+  .step b{font-family:Sora;color:var(--brown)}
+  .step .k{font-family:'JetBrains Mono',monospace;font-size:8.3pt;color:var(--muted)}
+  .note{background:#fff6dc;border:1px solid #edd38a;border-radius:8px;padding:9px 12px;font-size:9.2pt;margin:8px 0}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .tree{font-family:'JetBrains Mono',monospace;font-size:8.3pt;background:#f8f4ee;border-radius:8px;padding:10px 12px;white-space:pre;line-height:1.45}
+  .pb{break-before:page}
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <svg width="86" height="70" viewBox="0 0 86 70" fill="none" stroke="#dcab2c" stroke-width="6"><circle cx="43" cy="16" r="11"/><circle cx="16" cy="51" r="11"/><circle cx="70" cy="51" r="11"/></svg>
+  <div class="eyebrow" style="color:#f2d27a">Perartral Technologies India · Website build</div>
+  <h1>Landing website<br>implementation plan</h1>
+  <div class="tag">“The World Runs on Logistics. Logistics run with Perartral.”</div>
+  <div class="meta">Prepared 23 November 2026 · Version 1.0 · Folder: Company/Website2</div>
+</div>
+
+<h2><span class="n">01</span>What we are building</h2>
+<p>A single-page, scroll-driven landing site for Perartral. The layout follows the <b>armory.in</b> pattern: a preloader with a percentage count, a statement hero, short capability blocks, Featured News, a contact block and a heavy footer. Perartral's own brand, footage and interactions make it a different site, not a copy. The FPV canyon clips in the folder join the sections together as scroll-scrubbed transitions. Scrolling moves the drone through the terrain, which suits a company whose work is getting supplies through hard ground.</p>
+<table>
+  <tr><th style="width:28%">Requirement (from brief)</th><th>How it is met</th></tr>
+  <tr><td>Logo and colour theme: white, brown, gold</td><td>White and paper surfaces, logo brown <code>#4A2208</code> for type and dark panels, logo gold <code>#DCAB2C</code> for accents, rings and highlights. Colours are sampled from <code>perartral-logo.jpeg</code>.</td></tr>
+  <tr><td>Similar to armory.in, not the same</td><td>Same story order (preloader, hero statement, product, news, contact, footer). New layout, typography, motion language and colour system.</td></tr>
+  <tr><td>Video clips as scroll transitions</td><td>Each transition is a pinned section whose <code>_scrub.mp4</code> clip (all-keyframe encode, 720p) is scrubbed by scroll position.</td></tr>
+  <tr><td>Hero shows first part of the clip</td><td>Clip 01 plays its first ~1.6 s on its own after the preloader. Scrolling then scrubs the rest while the frame shrinks into the HimSetu section.</td></tr>
+  <tr><td>HimSetu section: minimal, images, map video</td><td>One headline, one paragraph, three part cards, demo screenshots from the reference PDF, and a <b>map clip rendered with HyperFrames</b>. There is no map video in the folder, so we make one.</td></tr>
+  <tr><td>Featured News</td><td>One card: <i>Perartral incubated at VIT Chennai, 2026.</i> The card layout takes more items later.</td></tr>
+  <tr><td>Contact section</td><td>Email card, a mailto-based enquiry form and a “Request a demo” call. The email is a single placeholder in <code>src/config.js</code>, filled in when you send it.</td></tr>
+  <tr><td>Premium footer with motion</td><td>Dark brown footer that is revealed from under the page. Interactive 3D gold rings (the logo mark), an animated gold sweep across the “Perartral” wordmark, and orbit lines drawn around it. Columns for LinkedIn, Gmail and Contact Us, plus legal and back-to-top links.</td></tr>
+  <tr><td>Must: spatial browsing</td><td><b>xr-live</b> “Spatial view” of HimSetu: a 3D terrain scene with posts and routes, and grabbable spatial cards. It works with mouse and touch orbit on any device and in an immersive XR session on headsets, with hand gestures.</td></tr>
+  <tr><td>Must: touchable surface</td><td><b>THREE.Interactive</b> on a 3D HimSetu tablet. Its Receive, Issue, Count and Demand keys press, glow and log an “offline entry” on tap or click. The hero and footer logo rings also react to touch.</td></tr>
+</table>
+
+<h2><span class="n">02</span>Brand system</h2>
+<div class="swatches">
+  <div class="sw"><i style="background:#ffffff;border-bottom:1px solid #eee"></i><span><b>White</b> #FFFFFF<br>page base</span></div>
+  <div class="sw"><i style="background:#faf7f2"></i><span><b>Paper</b> #FAF7F2<br>alt surface (logo bg)</span></div>
+  <div class="sw"><i style="background:#4a2208"></i><span><b>Perartral brown</b> #4A2208<br>type, dark panels</span></div>
+  <div class="sw"><i style="background:#2a1305"></i><span><b>Deep brown</b> #2A1305<br>footer, overlays</span></div>
+  <div class="sw"><i style="background:linear-gradient(90deg,#f0cd5e,#dcab2c,#b88617)"></i><span><b>Gold</b> #DCAB2C<br>gradient #F0CD5E→#B88617</span></div>
+</div>
+<ul>
+  <li><b>Display type:</b> <i>Sora</i>, a geometric sans close to the logo's letterforms. It is set large and tight (clamp 48–168 px) in sentence case.</li>
+  <li><b>Body type:</b> <i>Inter</i>, 16–18 px. <b>Labels:</b> <i>JetBrains Mono</i> eyebrows in uppercase with wide tracking, giving a technical feel.</li>
+  <li><b>Motifs:</b> the three rings, thin gold hairlines, a coordinate-style section index (<code>01 / HimSetu</code>), and a subtle film grain on video.</li>
+  <li><b>Tone:</b> calm and precise, with few words. The tagline is used in the hero and again in the footer.</li>
+</ul>
+
+<h2><span class="n">03</span>Technology stack</h2>
+<table>
+  <tr><th style="width:24%">Layer</th><th style="width:26%">Tool</th><th>Role</th></tr>
+  <tr><td>Build</td><td>Vite 8, plain ES modules</td><td>Dev server, bundling and hashed assets. No framework, so the page stays light.</td></tr>
+  <tr><td>Smooth scroll</td><td>Lenis</td><td>Inertial scrolling, kept in sync with GSAP's ticker.</td></tr>
+  <tr><td>Scroll animation</td><td>GSAP 3 + ScrollTrigger + SplitText</td><td>Pinning, video scrubbing, line and character reveals, clip-path wipes.</td></tr>
+  <tr><td>3D and touch</td><td>Three.js + THREE.Interactive</td><td>Hero rings, the HimSetu tablet touch surface and footer rings. Pointer and touch events on meshes.</td></tr>
+  <tr><td>Spatial browsing</td><td>three-live + xr-live (<code>&lt;xr-live&gt;</code>)</td><td>Sandboxed 3D scene, spatial HTML cards (<code>slot="spatial"</code>, <code>data-xr-grab</code>), 6DoF and <code>xr-hands="gestures"</code>.</td></tr>
+  <tr><td>Video render</td><td>HyperFrames 0.9.82 (GSAP adapter)</td><td>Renders the HimSetu supply-route map clip from HTML to MP4. The source is in <code>video/himsetu-map/</code>.</td></tr>
+  <tr><td>Media tools</td><td>ffmpeg (static build)</td><td>Web encodes, posters and checking the clips.</td></tr>
+</table>
+
+<h2 class="pb"><span class="n">04</span>Page flow and clip mapping</h2>
+<p>Solid lines are content sections. Dashed lines are pinned, scroll-scrubbed video transitions. Heights are in viewport units of scroll distance.</p>
+<div class="flow">
+  <div class="step"><div><b>Preloader</b><div class="k">~1.8 s</div></div><div>A 0→100 % counter in mono type. The three gold rings draw in, then a brown curtain lifts to reveal the hero. Video and fonts load during the count.</div></div>
+  <div class="step t"><div><b>Hero</b><div class="k">fpv_01 river rush · 250vh pin</div></div><div>Full-bleed clip 01 plays its first part, then hands over to scroll. Headline lines rise in: “The World Runs on Logistics.” / “Logistics run with Perartral.” Floating 3D logo rings react to touch. As you scroll, the text lifts away, the clip scrubs forward and the frame shrinks into a rounded card with a clip-path inset. The page turns white underneath: the short transition into HimSetu.</div></div>
+  <div class="step"><div><b>01 / HimSetu</b><div class="k">white · ~1.6 screens</div></div><div>“HimSetu: a bridge to the last post.” One line of copy and three part cards (Battalion server, Web app, Tablet app) with mask reveals. Two demo screenshots (dashboard, winter plan) with parallax. The <b>map clip</b> (HyperFrames) plays in a framed player. The 3D <b>touchable tablet</b> sits beside it, and a “Enter spatial view” button opens the <b>xr-live</b> scene.</div></div>
+  <div class="step t"><div><b>Transition A</b><div class="k">fpv_02 canyon dive · 220vh pin</div></div><div>The clip grows from a centred card to full-bleed, then scrubs the dive. Large outline type, “Where networks fail and roads close,” fills with gold as the clip progresses.</div></div>
+  <div class="step"><div><b>02 / Featured News</b><div class="k">paper · 1 screen</div></div><div>A heading with a running gold marquee (“Featured News · Latest from Perartral”). One feature card, <i>Incubation at VIT Chennai, 2026</i>, with tilt on hover, a mask-reveal image panel and a gold underline link.</div></div>
+  <div class="step t"><div><b>Transition B</b><div class="k">fpv_05 rising reveal · 220vh pin</div></div><div>The drone rises out of the canyon. A centred line reveals word by word: “Let's move what matters.” The frame then wipes up into the contact section.</div></div>
+  <div class="step"><div><b>03 / Contact</b><div class="k">white · 1 screen</div></div><div>A split layout: on the left a big “Talk to Perartral” with the email (placeholder) and copy-to-clipboard; on the right an enquiry form (name, organisation, message) that opens the visitor's mail client. A magnetic “Request a demo” button.</div></div>
+  <div class="step"><div><b>Footer</b><div class="k">deep brown · fixed reveal</div></div><div>Revealed from under the page as you scroll. Clip 06 plays as a duotone (brown and gold) background loop at low opacity. Interactive 3D gold rings, a huge “Perartral” wordmark with a moving gold light sweep, and SVG orbit paths drawing around the name. Columns: Company, Connect (LinkedIn, Gmail, X), Contact Us. Below them: © 2026, privacy, back-to-top.</div></div>
+</div>
+<div class="note"><b>Unused clips:</b> <code>fpv_03_rock_spires</code> and <code>fpv_04_canyon_weave</code> are kept for later sections (for example a Roadmap or About section) and are not shipped now, which keeps page weight down.</div>
+
+<h2><span class="n">05</span>Awwwards-style components we integrate</h2>
+<p>These are common award-site patterns, built from scratch with GSAP and CSS. No code is copied from any one site.</p>
+<table>
+  <tr><th style="width:30%">Component</th><th>Where it is used</th></tr>
+  <tr><td>Percentage preloader + curtain lift</td><td>Page entry</td></tr>
+  <tr><td>Scroll-scrubbed pinned video</td><td>Hero and both transitions. Smoothed with a lerp so frames never stutter.</td></tr>
+  <tr><td>Clip-path frame morph (full-bleed ↔ rounded card)</td><td>Hero exit, Transition A entry</td></tr>
+  <tr><td>SplitText line / word reveals with masks</td><td>All headlines</td></tr>
+  <tr><td>Outline-to-fill text on scroll</td><td>Transition A statement</td></tr>
+  <tr><td>Infinite marquee with scroll-velocity skew</td><td>Featured News header</td></tr>
+  <tr><td>Magnetic buttons + custom blend cursor</td><td>Calls to action, nav (desktop only)</td></tr>
+  <tr><td>Image mask reveal + parallax</td><td>HimSetu screenshots, news card</td></tr>
+  <tr><td>Hide-on-scroll header with progress hairline</td><td>Global</td></tr>
+  <tr><td>Fixed footer reveal (page lifts off the footer)</td><td>Footer</td></tr>
+  <tr><td>Gold shine sweep + SVG path drawing</td><td>Footer wordmark and logo</td></tr>
+</table>
+
+<h2 class="pb"><span class="n">06</span>Spatial browsing and touchable surfaces</h2>
+<div class="two">
+<div>
+<h3>Spatial browsing (xr-live)</h3>
+<ul>
+  <li>An <code>&lt;xr-live&gt;</code> element with <code>camera-controls</code>, <code>xr-mode="auto"</code>, <code>xr-hands="gestures"</code> and <code>sound-feedback</code>. Neutral tone mapping keeps the brand colours true.</li>
+  <li>A sandboxed <code>text/three</code> script builds a stylised terrain: a battalion hub, six forward posts, and routes by porter, pack animal, vehicle and helicopter arc, all in brand gold and brown.</li>
+  <li>Three spatial HTML cards (<code>slot="spatial"</code>) hang in 3D space, one per HimSetu part. Each has <code>data-xr-grab</code>, so it can be grabbed and moved by hand in XR. The cards are added after the scene loads, which xr-live 1.3 requires.</li>
+  <li>Opens in a full-screen “Spatial view” layer from the HimSetu section. A desktop or phone visitor orbits with drag or pinch. On a headset, the same scene enters immersive mode.</li>
+</ul>
+</div>
+<div>
+<h3>Touchable surfaces (Three.js + THREE.Interactive)</h3>
+<ul>
+  <li><b>HimSetu tablet:</b> a 3D tablet with the real app layout (Receive, Issue, Count, Demand). Each key is a mesh registered with <code>InteractionManager</code>. Pressing a key depresses and lights it and adds a line to an on-screen log: “Saved offline · will sync.” The tablet tilts toward the pointer.</li>
+  <li><b>Hero rings:</b> the three logo rings float in the hero. Hover or tap spins a ring and sends a gold pulse.</li>
+  <li><b>Footer rings:</b> a larger metallic version. Drag to spin, and they settle back with spring physics.</li>
+  <li>Touch events are treated as pointer events. Render loops pause when off-screen, using IntersectionObserver.</li>
+</ul>
+</div>
+</div>
+
+<h2><span class="n">07</span>HimSetu map clip (HyperFrames)</h2>
+<ul>
+  <li>Project: <code>video/himsetu-map/</code>, 1920×1080, 12 s, a seamless loop driven by a paused GSAP timeline registered on <code>window.__timelines</code>.</li>
+  <li>Story: contour terrain draws in, then the battalion hub appears. Six posts pop in with “offline” badges. Routes draw by transport mode with moving cargo dots, and a helicopter arc follows. A sync pulse runs when a link appears, the days-of-supply counters update, and the badges turn to “synced”.</li>
+  <li>Contours come from seeded, deterministic noise, never <code>Math.random</code>. All names and figures are labelled <b>demo data</b>, with no real locations, per the reference PDF.</li>
+  <li>Pipeline: <code>hyperframes check</code>, then <code>snapshot</code> to review frames, then <code>render</code>. ffmpeg then makes a web encode at 1280×720 H.264, faststart, around 2–4 MB.</li>
+</ul>
+
+<h2><span class="n">08</span>Performance, accessibility, responsiveness</h2>
+<ul>
+  <li><b>Video:</b> uses the provided <code>_scrub</code> encodes (every frame a keyframe) for exact seeking, with posters as the first paint. Clips load with <code>preload="auto"</code> only when within about one screen of view.</li>
+  <li><b>Mobile:</b> same story, shorter pin distances. The custom cursor is off, and 3D uses a pixel ratio of at most 1.5. Touch drives every interactive surface.</li>
+  <li><b>Reduced motion:</b> scroll-linked scenes still play, because they move only when the visitor scrolls. Smooth-scroll inertia, autoplay, grain and decorative loops are switched off.</li>
+  <li><b>Accessibility:</b> semantic landmarks, a skip link, alt text, visible focus rings in gold, a keyboard-usable form and buttons, and AA contrast for text over video using gradient scrims.</li>
+  <li><b>Fallbacks:</b> if WebGL fails, the tablet and rings fall back to static images. If xr-live cannot start, the spatial view shows a message and the static screenshots.</li>
+</ul>
+
+<h2><span class="n">09</span>Content to confirm before launch</h2>
+<table>
+  <tr><th style="width:32%">Item</th><th>Status</th></tr>
+  <tr><td>Contact email (Gmail)</td><td>Placeholder in <code>src/config.js</code>. You will send it.</td></tr>
+  <tr><td>LinkedIn and X URLs</td><td>Placeholders in <code>src/config.js</code></td></tr>
+  <tr><td>News date for VIT Chennai incubation</td><td>Shown as “2026”. Add the exact date and article link when ready.</td></tr>
+  <tr><td>HimSetu copy and screenshots</td><td>Demo screenshots only, as the reference PDF requires. No force or customer names.</td></tr>
+  <tr><td>Hosting and domain</td><td>A static build (<code>dist/</code>) that can be deployed to any static host.</td></tr>
+</table>
+
+<h2><span class="n">10</span>Build phases</h2>
+<table>
+  <tr><th style="width:6%">#</th><th style="width:30%">Phase</th><th>Output</th></tr>
+  <tr><td>1</td><td>Assets</td><td>Copy scrub clips and posters to <code>public/media</code>, extract HimSetu screenshots from the PDF, cut a transparent logo and SVG ring mark.</td></tr>
+  <tr><td>2</td><td>Map clip</td><td>HyperFrames composition, check, snapshot review, render, web encode.</td></tr>
+  <tr><td>3</td><td>Page skeleton</td><td>Vite project, design tokens, sections, header, content.</td></tr>
+  <tr><td>4</td><td>Motion</td><td>Lenis, ScrollTrigger pins and scrubbing, SplitText reveals, marquee, magnetic buttons, cursor, preloader.</td></tr>
+  <tr><td>5</td><td>3D and spatial</td><td>Hero rings, touch tablet, footer rings (THREE.Interactive). xr-live spatial view.</td></tr>
+  <tr><td>6</td><td>Footer</td><td>Fixed reveal, wordmark shine, orbit paths, link columns.</td></tr>
+  <tr><td>7</td><td>QA</td><td>Production build, headless-browser screenshots at desktop and phone widths, console-error check, reduced-motion check.</td></tr>
+</table>
+
+<h3>Folder structure</h3>
+<div class="tree">Website2/
+├─ index.html                 page markup (all sections)
+├─ src/
+│  ├─ main.js                 boot: preloader, Lenis, modules
+│  ├─ config.js               email, LinkedIn, X, news items
+│  ├─ styles/                 tokens.css, base.css, sections.css
+│  ├─ motion/                 scroll-video.js, reveals.js, marquee.js, cursor.js, magnetic.js
+│  ├─ three/                  rings.js, tablet.js (THREE.Interactive)
+│  └─ spatial/                spatial-view.js (xr-live)
+├─ public/media/              scrub clips, posters, himsetu-map.mp4, screenshots, logo
+├─ video/himsetu-map/         HyperFrames source for the map clip
+└─ docs/                      this plan (PDF + HTML)</div>
+
+</body>
+</html>
