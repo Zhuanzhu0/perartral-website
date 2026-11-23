@@ -104,7 +104,7 @@
   position: absolute; z-index: 5; left: var(--gutter); right: var(--gutter); bottom: clamp(88px, 14vh, 140px);
   max-width: 1180px; color: #fff;
 }
-.hero__title { font: 600 clamp(40px, 6.4vw, 112px)/0.98 var(--font-display); letter-spacing: -0.045em; margin: 22px 0 26px; }
+.hero__title { font: 600 clamp(34px, 4.8vw, 84px)/0.98 var(--font-display); letter-spacing: -0.045em; margin: 22px 0 26px; max-width: 10em; }
 .hero__line { display: block; }
 .hero__line--gold { background: var(--grad-gold); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 300; }
 .hero__sub { max-width: 44ch; font-size: clamp(16px, 1.3vw, 19px); color: rgba(255,255,255,.82); }

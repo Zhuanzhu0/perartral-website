@@ -339,8 +339,9 @@ function initReveals() {
 function initMarquee() {
   const track = $('.marquee__track');
   track.innerHTML += track.innerHTML; // duplicate for a seamless loop
+  // The loop always runs, even under reduced motion (e.g. Windows "Animation effects" off).
   const loop = gsap.to(track, { xPercent: -50, duration: 36, ease: 'none', repeat: -1 });
-  if (reduced) { loop.pause(); return; }
+  if (reduced) return; // reduced motion: steady loop, no scroll-velocity speed-up or skew
   const skew = gsap.quickTo(track, 'skewX', { duration: 0.5, ease: 'power3' });
   ScrollTrigger.create({
     trigger: '.news', start: 'top bottom', end: 'bottom top',
