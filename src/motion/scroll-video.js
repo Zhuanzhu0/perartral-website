@@ -3,7 +3,7 @@ import gsap from 'gsap';
 /**
  * A <video> whose time follows a target set by scroll.
  * The whole clip is fetched as a Blob first, so seeking never waits on range requests,
- * and the provided *_scrub.mp4 files are all-keyframe encodes, so every seek is exact.
+ * and the provided *_scrub.mp4 files are all-keyframe encodes, so every seek decodes a single frame.
  */
 export class ScrubVideo {
   constructor(section) {
@@ -14,6 +14,8 @@ export class ScrubVideo {
     this.target = 0;
     this.current = 0;
     this.duration = 8;
+    this.fps = Number(section.dataset.fps) || 30; // the FPV clips are constant 30 fps
+    this.shownFrame = -1;
     this.loading = null;
     this.onProgress = null;
     this.autoplaying = false;
@@ -81,9 +83,16 @@ export class ScrubVideo {
     if (!this.ready || this.autoplaying) return;
     this.current += (this.target - this.current) * 0.22;
     if (Math.abs(this.target - this.current) < 0.002) this.current = this.target;
+    // Seek only when the frame index changes, and aim at the middle of that frame.
+    // Sub-frame seeks re-decode the frame already on screen and hold `seeking`,
+    // which delays the next real frame change (uneven cadence = micro-stutter);
+    // seeking exactly on a frame boundary can round to either neighbour (flicker).
     const v = this.video;
-    if (!v.seeking && Math.abs(v.currentTime - this.current) > 0.012) {
-      v.currentTime = this.current;
+    const last = Math.max(0, Math.floor(this.duration * this.fps) - 1);
+    const frame = Math.min(last, Math.max(0, Math.round(this.current * this.fps)));
+    if (!v.seeking && frame !== this.shownFrame) {
+      this.shownFrame = frame;
+      v.currentTime = (frame + 0.5) / this.fps;
     }
   }
 }

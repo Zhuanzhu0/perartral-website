@@ -217,7 +217,8 @@ export function createTablet(canvas, logEl) {
     interaction.update();
     renderer.render(scene, camera);
   }
-  new IntersectionObserver(([e]) => {
+  new IntersectionObserver((entries) => {
+    const e = entries[entries.length - 1]; // latest state wins
     if (e.isIntersecting && !running) { running = true; frame(); }
     else if (!e.isIntersecting && running) { running = false; cancelAnimationFrame(raf); }
   }).observe(canvas);

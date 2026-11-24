@@ -8,8 +8,8 @@ export const site = {
   // TODO: add the company email you want visitors to write to (e.g. a Gmail address).
   email: '',
 
-  // TODO: add the company LinkedIn page URL.
-  linkedin: '',
+  // Company LinkedIn page.
+  linkedin: 'https://www.linkedin.com/company/perartral.in',
 
   // Optional: X (Twitter) profile URL. Leave empty to hide it.
   x: '',

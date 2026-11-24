@@ -11,6 +11,7 @@ import { site, news } from './config.js';
 import { ScrubVideo } from './motion/scroll-video.js';
 import { initMagnetic, initTilt } from './motion/interactions.js';
 import { initSpatialView } from './spatial/spatial-view.js';
+import { createHalftone } from './motion/halftone.js';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -55,17 +56,19 @@ function renderContent() {
       try { await navigator.clipboard.writeText(site.email); copy.textContent = 'Copied'; } catch { copy.textContent = 'Press Ctrl+C'; }
       setTimeout(() => (copy.textContent = 'Copy'), 1800);
     });
-    $('#f-gmail').href = `mailto:${site.email}`;
-    $('.f-email').textContent = site.email;
+    $$('[data-link="email"]').forEach((a) => { a.href = `mailto:${site.email}`; });
+    $$('[data-text="email"]').forEach((el) => { el.textContent = site.email; });
   } else {
     addr.classList.add('is-placeholder');
     addr.removeAttribute('data-cursor');
   }
+  const external = (a, url) => { a.href = url; a.target = '_blank'; a.rel = 'noopener'; };
   if (site.linkedin) {
-    for (const a of [$('#contact-linkedin'), $('#f-linkedin')]) { a.href = site.linkedin; a.target = '_blank'; a.rel = 'noopener'; }
+    $$('[data-link="linkedin"]').forEach((a) => external(a, site.linkedin));
+    external($('#contact-linkedin'), site.linkedin);
     $('#contact-linkedin').textContent = 'Perartral Technologies';
   }
-  if (site.x) { const x = $('#f-x'); x.hidden = false; x.href = site.x; x.target = '_blank'; x.rel = 'noopener'; }
+  if (site.x) $$('[data-link="x"]').forEach((a) => { a.hidden = false; external(a, site.x); });
   $('#contact-location').textContent = site.location;
   $('#year').textContent = String(new Date().getFullYear());
 
@@ -124,7 +127,8 @@ function initHeader() {
   const header = $('.header');
   const progress = $('.header__progress i');
   const menuBtn = $('.header__menu');
-  const menu = $('#mobile-menu');
+  const menu = $('#site-menu');
+  const panel = $('.menu__panel', menu);
   let lastY = 0;
 
   ScrollTrigger.create({
@@ -140,16 +144,45 @@ function initHeader() {
     },
   });
 
-  const setMenu = (open) => {
+  const isOpen = () => menuBtn.getAttribute('aria-expanded') === 'true';
+  const setMenu = (open, { restoreFocus = true } = {}) => {
+    if (open === isOpen()) return;
     menuBtn.setAttribute('aria-expanded', String(open));
     menuBtn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
-    menu.hidden = !open;
     document.body.classList.toggle('menu-open', open);
     header.classList.remove('is-hidden');
-    if (open) { header.classList.remove('is-solid'); lenis?.stop(); gsap.from($$('a', menu), { y: 40, opacity: 0, stagger: 0.06, duration: 0.7, ease: 'expo.out' }); }
-    else lenis?.start();
+    gsap.killTweensOf([menu, panel]);
+    if (open) {
+      menu.hidden = false;
+      header.classList.remove('is-solid');
+      lenis?.stop();
+      if (reduced) { gsap.set([menu, panel], { clearProps: 'all' }); }
+      else {
+        gsap.fromTo(menu, { opacity: 0 }, { opacity: 1, duration: 0.35, ease: 'power2.out' });
+        gsap.fromTo(panel, { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', duration: 0.75, ease: 'expo.out' });
+        gsap.from($$('.menu__nav a, .menu__pitch > *, .menu__col', panel), { y: 30, opacity: 0, stagger: 0.04, duration: 0.7, ease: 'expo.out', delay: 0.1 });
+      }
+      $('.menu__nav a', panel).focus({ preventScroll: true });
+    } else {
+      lenis?.start();
+      const done = () => { menu.hidden = true; gsap.set([menu, panel], { clearProps: 'all' }); };
+      if (reduced) done();
+      else gsap.to(menu, { opacity: 0, duration: 0.3, ease: 'power2.in', onComplete: done });
+      if (restoreFocus) menuBtn.focus({ preventScroll: true });
+    }
   };
-  menuBtn.addEventListener('click', () => setMenu(menuBtn.getAttribute('aria-expanded') !== 'true'));
+  menuBtn.addEventListener('click', () => setMenu(!isOpen()));
+  $('[data-menu-close]', menu).addEventListener('click', () => setMenu(false));
+  document.addEventListener('keydown', (e) => {
+    if (!isOpen()) return;
+    if (e.key === 'Escape') { setMenu(false); return; }
+    if (e.key !== 'Tab') return;
+    // keep Tab inside the header button + menu panel while open
+    const items = [menuBtn, ...$$('a:not([hidden]), button', panel)];
+    const i = items.indexOf(document.activeElement);
+    if (e.shiftKey && i <= 0) { e.preventDefault(); items[items.length - 1].focus(); }
+    else if (!e.shiftKey && i === items.length - 1) { e.preventDefault(); items[0].focus(); }
+  });
 
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href^="#"]');
@@ -157,7 +190,7 @@ function initHeader() {
     const id = a.getAttribute('href');
     if (id.length < 2) return;
     e.preventDefault();
-    if (document.body.classList.contains('menu-open')) setMenu(false);
+    if (isOpen()) setMenu(false, { restoreFocus: false });
     scrollToTarget(id === '#top' ? document.body : id);
   });
   $('.to-top').addEventListener('click', () => (lenis ? lenis.scrollTo(0, { duration: 2.2 }) : window.scrollTo({ top: 0, behavior: 'smooth' })));
@@ -238,6 +271,7 @@ function heroIntro(heroVideo) {
       heroVideo.autoplaying = false;
       v.pause();
       heroVideo.current = heroVideo.target = v.currentTime;
+      heroVideo.shownFrame = -1;
     };
     const watch = () => {
       if (!heroVideo.autoplaying) return;
@@ -361,6 +395,48 @@ function initFooter() {
   const footer = $('#footer');
   const inner = $('.footer__inner');
   const video = $('.footer__video');
+  const word = $('.footer__word');
+  const base = $('.footer__word-base', word);
+  const shine = $('.footer__word-shine', word);
+  const brand = $('.footer__brand');
+
+  // The middle letter (the R of PERARTRAL) is where the shine and the map ripple start.
+  const MID = Math.floor(base.textContent.length / 2);
+  const midRect = () => {
+    const r = document.createRange();
+    r.setStart(base.firstChild, MID); r.setEnd(base.firstChild, MID + 1);
+    return r.getBoundingClientRect();
+  };
+  // centre of that R in footer coordinates (offsets, so scroll-reveal transforms don't skew it)
+  const anchor = () => {
+    const m = midRect(), w = word.getBoundingClientRect();
+    return { x: brand.offsetLeft + word.offsetLeft + (m.left + m.width / 2 - w.left), y: brand.offsetTop + word.offsetTop + (m.top + m.height / 2 - w.top) };
+  };
+
+  let pulseAt = -1; // time the current ripple started (ms), -1 = none
+  const dots = createHalftone($('.footer__dots'), video, { anchor, pulseAge: () => (pulseAt < 0 ? -1 : (performance.now() - pulseAt) / 1000) });
+
+  // size the wordmark so it fills the width next to the rings, then re-aim the shine and the map at the R
+  const fitWord = () => {
+    word.style.setProperty('--fw', '100px');
+    const range = document.createRange();
+    range.selectNodeContents(base);
+    const natural = range.getBoundingClientRect().width; // text width at 100px
+    const room = word.clientWidth;
+    if (natural && room) word.style.setProperty('--fw', `${Math.min(260, (room / natural) * 100 * 0.995).toFixed(2)}px`);
+    const m = midRect(), w = shine.getBoundingClientRect();
+    if (w.width) shine.style.setProperty('--c', `${(((m.left + m.width / 2 - w.left) / w.width) * 100).toFixed(2)}%`);
+    dots.relayout();
+  };
+  fitWord();
+  document.fonts?.ready.then(() => { fitWord(); fit(); });
+
+  // Shine: two highlights leave the R together, one to P and one to L; a ripple crosses the map with them.
+  const sweep = gsap.timeline({ repeat: -1, repeatDelay: 2.8, paused: true, onRepeat: () => { pulseAt = performance.now(); }, onStart: () => { pulseAt = performance.now(); } });
+  sweep.fromTo(shine, { '--s': 0 }, { '--s': 1, duration: 2.2, ease: 'power2.inOut' }, 0)
+    .fromTo(shine, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power1.out' }, 0)
+    .to(shine, { opacity: 0, duration: 0.5, ease: 'power1.in' }, 1.75);
+
   const fit = () => {
     footer.classList.remove('is-fixed');
     footer.style.removeProperty('--fh');
@@ -372,19 +448,26 @@ function initFooter() {
     ScrollTrigger.refresh();
   };
   fit();
-  let to; window.addEventListener('resize', () => { clearTimeout(to); to = setTimeout(fit, 200); });
+  let to; window.addEventListener('resize', () => { clearTimeout(to); to = setTimeout(() => { fitWord(); fit(); }, 200); });
 
-  new IntersectionObserver(([e]) => {
-    if (e.isIntersecting) { if (!video.src.includes('blob') && video.preload === 'none') video.preload = 'auto'; video.play().catch(() => {}); }
-    else video.pause();
+  // use the latest entry: a jump-scroll can deliver a stale "not visible" entry together with the new one
+  new IntersectionObserver((entries) => {
+    const e = entries[entries.length - 1];
+    if (e.isIntersecting) {
+      if (video.preload === 'none') video.preload = 'auto';
+      // The shine (and the map ripple it starts) always runs, like the news marquee, even with
+      // reduced motion on (e.g. Windows "Animation effects" off). Only the background video stays still.
+      if (!reduced) video.play().catch(() => {});
+      sweep.play();
+      dots.start();
+    } else { video.pause(); dots.stop(); sweep.pause(); }
   }).observe(footer);
 
   const tl = gsap.timeline({ scrollTrigger: { trigger: footer, start: 'top 75%', end: 'bottom bottom', scrub: 0.6 }, defaults: { ease: 'none' } });
-  tl.from('.footer__word', { yPercent: 40, opacity: 0, letterSpacing: '0.02em' }, 0)
-    .from('.footer__rings', { scale: 0.6, opacity: 0, rotate: -40 }, 0)
-    .from('.footer__orbits', { scaleX: 0.6, opacity: 0 }, 0.1)
-    .from('.footer__tag', { y: 40, opacity: 0 }, 0)
-    .from('.footer__sub', { opacity: 0, letterSpacing: '1.4em' }, 0.2);
+  tl.from('.footer__nav', { y: 30, opacity: 0 }, 0)
+    .from('.footer__rule', { scaleX: 0, transformOrigin: 'left center' }, 0.05)
+    .from('.footer__word', { yPercent: 30, opacity: 0 }, 0.1)
+    .from('.footer__rings', { scale: 0.6, opacity: 0, rotate: -40 }, 0.1);
 }
 
 /* ---------------------------------------------------------------
@@ -412,7 +495,8 @@ function init3D() {
 
 function initMapClip() {
   const v = $('.mapclip__video');
-  new IntersectionObserver(([e]) => {
+  new IntersectionObserver((entries) => {
+    const e = entries[entries.length - 1];
     if (e.isIntersecting) { v.preload = 'auto'; if (reduced) v.controls = true; else v.play().catch(() => {}); } else v.pause();
   }, { threshold: 0.25 }).observe(v);
 }

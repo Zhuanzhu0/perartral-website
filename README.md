@@ -18,7 +18,7 @@ npm run deploy    # build and publish to Cloudflare Pages (project "perartral")
 All editable content is in `src/config.js`:
 
 - `email`: the address visitors write to. While it is empty, the site shows "coming soon" and the form does not send.
-- `linkedin` and `x`: profile URLs. X stays hidden while its value is empty.
+- `linkedin` and `x`: profile URLs (LinkedIn is set to the company page). X stays hidden while its value is empty. They fill every LinkedIn/Email/X link in the menu, contact section and footer.
 - `news`: Featured News cards, newest first. Add a `link` once an article exists.
 
 ## Page order
@@ -32,7 +32,8 @@ All editable content is in `src/config.js`:
 | 02 Featured News: marquee and the VIT Chennai card | `src/config.js` |
 | Transition B: clip 05; word-by-word reveal | `fpv_05_rising_reveal_scrub.mp4` |
 | 03 Contact: email card and a mailto form | `src/config.js` |
-| Footer: revealed from under the page. 3D rings, gold sweep on the wordmark, orbit lines, clip 06 behind | `src/three/rings.js` |
+| Menu: three-line button in the header opens a panel with the sections, a demo call-to-action and contact links | `index.html` (`#site-menu`), `src/main.js` → `initHeader` |
+| Footer: revealed from under the page. Links row, 3D rings and a brushed-gold wordmark (its shine starts at the middle R and runs out to P and L), over a dot-matrix map of India drawn from clip 06 | `src/three/rings.js`, `src/motion/halftone.js`, `src/motion/india-map.js` |
 
 ## Stack
 
@@ -46,9 +47,24 @@ All editable content is in `src/config.js`:
   npx --prefix .. hyperframes check
   npx --prefix .. hyperframes render -o renders/himsetu-map.mp4
   ```
-  Then re-encode the render to `public/media/himsetu-map.mp4`. The site uses a 1440 px wide H.264 encode with faststart.
+  Then copy the render to the site without re-encoding (the render is already CRF 16):
+  `ffmpeg -i renders/himsetu-map.mp4 -c copy -movflags +faststart -an ../../public/media/himsetu-map.mp4`
+
+## Video encodes
+
+Media under `/media/` is cached by browsers for 7 days (`public/_headers`). Whenever you replace a file there, bump its `?v=` number in `index.html` so returning visitors fetch the new one.
+
+
+Always encode from the 1080p30 originals in the repo root, never from a previous web file.
+
+- Scrub clips (`*_scrub.mp4`): native 1920x1080, 30 fps, all-intra (every frame a keyframe, so scrubbing in either direction decodes one frame per seek):
+  `ffmpeg -i fpv_XX.mp4 -map 0:v:0 -c:v libx264 -preset slow -crf 18 -g 1 -keyint_min 1 -bf 0 -pix_fmt yuv420p -profile:v high -level 4.1 -colorspace bt709 -color_primaries bt709 -color_trc bt709 -color_range tv -fps_mode passthrough -map_metadata -1 -movflags +faststart -an public/media/fpv_XX_scrub.mp4`
+  Clip 01 uses CRF 18; clips 02 and 05 use CRF 19 so they stay under Cloudflare Pages' 25 MiB per-file limit.
+- Footer loop: stream copy of `fpv_06_canyon_overview.mp4` (`-c copy -movflags +faststart -an`), bit-identical to the source.
 
 ## Notes
+
+- The footer map of India (`src/motion/india-map.js`) uses India's official boundary, including all of Jammu & Kashmir and Ladakh. Source: `@highcharts/map-collection` 2.3.0, `countries/in/custom/in-all-disputed.geo.json`, simplified. Keep this outline if the map is ever replaced.
 
 - With *reduce motion* turned on, the scroll-linked scenes still play, because they only move when the visitor scrolls. Smooth-scroll inertia, autoplay and decorative loops are switched off.
 - HimSetu screens and the map use demo data only, as the company reference requires.

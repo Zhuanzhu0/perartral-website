@@ -52,12 +52,20 @@ export function createRings(canvas, { mode = 'hero' } = {}) {
     gsap.fromTo(m.material, { emissiveIntensity: 1.4 }, { emissiveIntensity: 0, duration: 1.2, ease: 'power2.out' });
     gsap.fromTo(m.scale, { x: 1.12, y: 1.12, z: 1.12 }, { x: 1, y: 1, z: 1, duration: 1, ease: 'elastic.out(1, 0.35)' });
   };
+  // Each ring gets an invisible disc as its hit target, so the whole ring (hole included)
+  // responds the same way, rather than only the thin tube. Discs sit in `mark`, so they
+  // follow the tilt but not the ring's own spin (a spinning ring would turn edge-on).
+  const hitGeo = new THREE.CircleGeometry(0.8, 48);
+  const hitMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
   rings.forEach((m) => {
-    interaction.add(m);
-    m.addEventListener('mouseover', () => { canvas.style.cursor = 'pointer'; kick(m, 7); });
-    m.addEventListener('mouseout', () => { canvas.style.cursor = ''; });
-    m.addEventListener('mousedown', () => kick(m, 14));
-    m.addEventListener('touchstart', () => kick(m, 14));
+    const hit = new THREE.Mesh(hitGeo, hitMat);
+    hit.position.copy(m.position);
+    mark.add(hit);
+    interaction.add(hit);
+    hit.addEventListener('mouseover', () => { canvas.style.cursor = 'pointer'; kick(m, 7); });
+    hit.addEventListener('mouseout', () => { canvas.style.cursor = ''; });
+    hit.addEventListener('mousedown', () => kick(m, 14));
+    hit.addEventListener('touchstart', () => kick(m, 14));
   });
 
   // Pointer tilt (whole page) and drag-to-spin (footer)
@@ -125,7 +133,8 @@ export function createRings(canvas, { mode = 'hero' } = {}) {
     renderer.render(scene, camera);
   }
 
-  const io = new IntersectionObserver(([e]) => {
+  const io = new IntersectionObserver((entries) => {
+    const e = entries[entries.length - 1]; // latest state wins
     if (e.isIntersecting && !running) { running = true; clock.getDelta(); frame(); }
     else if (!e.isIntersecting && running) { running = false; cancelAnimationFrame(raf); }
   });
