@@ -389,6 +389,86 @@ body.menu-open { overflow: hidden; }
 .sw--gold { background: var(--gold); } .sw--brown { background: var(--brown); } .sw--line { width: 18px; height: 3px; border-radius: 2px; background: var(--gold-lo); }
 
 /* =========================================================
+   SCROLLBAR (custom "flight lane"; built in src/motion/scrollbar.js)
+   ========================================================= */
+/* hide the native page scrollbar; scrolling itself is unchanged */
+html { scrollbar-width: none; }
+html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; width: 0; height: 0; }
+html.is-sbar-drag, html.is-sbar-drag * { user-select: none; cursor: grabbing !important; }
+/* inner scroll areas keep a slim native bar, tinted gold */
+.menu__panel { scrollbar-width: thin; scrollbar-color: rgba(220,171,44,.5) transparent; }
+
+.sbar {
+  --thumb: 28px;
+  /* a short lane (20% of the screen height) on the far right, centred vertically */
+  position: fixed; z-index: 110; top: 50%; right: 2px; width: var(--thumb); height: max(160px, 20vh); transform: translateY(-50%);
+  opacity: .5; cursor: pointer; touch-action: none;
+  transition: opacity .5s var(--ease-out);
+}
+.sbar.is-active, .sbar:hover, .sbar.is-dragging { opacity: 1; }
+body.is-loading .sbar, body.menu-open .sbar { opacity: 0; pointer-events: none; }
+
+/* the lane: dashed like the preloader's flight path, filled with glowing gold as you go */
+.sbar__rail {
+  /* lane, posts and thumb all share one centre line: left 50% of the bar */
+  position: absolute; top: calc(var(--thumb) / 2); bottom: calc(var(--thumb) / 2); left: 50%; width: 2px; translate: -50% 0; border-radius: 2px;
+  background: repeating-linear-gradient(180deg, rgba(184,134,23,.5) 0 6px, transparent 6px 11px);
+  transition: width .35s var(--ease-out);
+}
+.sbar:hover .sbar__rail, .sbar.is-dragging .sbar__rail { width: 4px; }
+.sbar__fill {
+  position: absolute; inset: 0; border-radius: inherit; transform-origin: top; transform: scaleY(var(--p, 0));
+  background: linear-gradient(180deg, var(--gold-lo), var(--gold) 70%, var(--gold-hi));
+  box-shadow: 0 0 calc(4px + var(--v, 0) * 14px) rgba(240,205,94,.8);
+}
+
+/* the thumb: the three rings, spinning with distance scrolled, swelling with speed */
+.sbar__thumb {
+  position: absolute; left: 0; top: 0; width: var(--thumb); height: var(--thumb);
+  transform: translateY(var(--ty, 0px)); cursor: grab;
+}
+.sbar__thumb::before { /* soft halo that brightens while moving */
+  content: ''; position: absolute; inset: -9px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(240,205,94,.55), rgba(240,205,94,0));
+  opacity: calc(.15 + var(--v, 0) * .85); transition: opacity .3s;
+}
+.sbar:hover .sbar__thumb::before, .sbar.is-dragging .sbar__thumb::before { opacity: .7; }
+.sbar__thumb svg {
+  position: relative; width: 100%; height: 100%; overflow: visible;
+  transform: rotate(var(--a, 0deg)) scale(calc(1 + var(--v, 0) * .22));
+  filter: drop-shadow(0 1px 2px rgba(28,12,3,.55));
+}
+.sbar__thumb circle { fill: none; stroke: url(#sbar-g); stroke-width: 9; }
+.sbar.is-dragging .sbar__thumb svg { transform: rotate(var(--a, 0deg)) scale(1.18); }
+
+/* section posts: diamonds on the lane, gold once passed; labels slide out on hover */
+.sbar__mark { position: absolute; right: 0; width: var(--thumb); height: 16px; margin-top: -8px; padding: 0; border: 0; background: none; cursor: pointer; }
+.sbar__mark::before {
+  content: ''; position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; box-sizing: border-box; transform: translate(-50%, -50%) rotate(45deg);
+  border: 1.5px solid var(--gold); background: var(--brown-2); transition: background-color .4s, box-shadow .4s, transform .4s var(--ease-out);
+}
+.sbar__mark.is-passed::before { background: var(--gold); box-shadow: 0 0 8px rgba(240,205,94,.85); }
+.sbar__mark:hover::before { transform: translate(-50%, -50%) rotate(45deg) scale(1.35); }
+.sbar__label {
+  position: absolute; right: calc(var(--thumb) + 6px); top: 50%; translate: 10px -50%; opacity: 0; pointer-events: none; white-space: nowrap;
+  padding: 4px 10px; border-radius: 999px; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--cream); background: rgba(28,12,3,.86); border: 1px solid rgba(220,171,44,.32); backdrop-filter: blur(8px);
+  transition: opacity .3s, translate .45s var(--ease-out);
+}
+.sbar__label b { color: var(--gold-hi); font-weight: 500; margin-right: 8px; }
+.sbar:hover .sbar__label, .sbar__mark.is-flash .sbar__label { opacity: 1; translate: 0 -50%; }
+.sbar:hover .sbar__mark:nth-child(2) .sbar__label { transition-delay: .04s; }
+.sbar:hover .sbar__mark:nth-child(3) .sbar__label { transition-delay: .08s; }
+.sbar:hover .sbar__mark:nth-child(4) .sbar__label { transition-delay: .12s; }
+.sbar__mark.is-current .sbar__label { border-color: rgba(240,205,94,.7); }
+
+/* touch screens: a slim indicator only (dragging a small thumb is fiddly there) */
+@media (pointer: coarse) {
+  .sbar { --thumb: 16px; right: 0; pointer-events: none; }
+  .sbar__label { display: none; }
+}
+
+/* =========================================================
    RESPONSIVE
    ========================================================= */
 @media (max-width: 1024px) {

@@ -12,6 +12,7 @@ import { ScrubVideo } from './motion/scroll-video.js';
 import { initMagnetic, initTilt } from './motion/interactions.js';
 import { initSpatialView } from './spatial/spatial-view.js';
 import { createHalftone } from './motion/halftone.js';
+import { initScrollbar } from './motion/scrollbar.js';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -532,6 +533,7 @@ async function boot() {
   initReveals();
   initMarquee();
   initFooter();
+  initScrollbar({ lenis });
   heroIntro(hero);
   ScrollTrigger.refresh();
 }
